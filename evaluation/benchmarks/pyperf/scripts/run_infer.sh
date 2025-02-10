@@ -14,7 +14,7 @@ SPLIT=$8
 N_RUNS=$9
 
 if [ -z "$NUM_WORKERS" ]; then
-  NUM_WORKERS=2
+  NUM_WORKERS=1
   echo "Number of workers not specified, use default $NUM_WORKERS"
 fi
 checkout_eval_branch
