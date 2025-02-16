@@ -28,29 +28,21 @@ def convert_row_to_pyperf_format(row):
 
 if len(args.oh_output_files) > 1 or os.path.isdir(args.oh_output_files[0]):
     args.oh_output_files = [d for d in args.oh_output_files if os.path.isdir(d)]
-
-    all_results = []
-    common_path = os.path.dirname(args.oh_output_files[0])
-    model_name = os.path.basename(args.oh_output_files[0]).replace('-run_1', '')
-    num_dirs = len(args.oh_output_files)
-    output_filepath = os.path.join(
-        common_path, f'{model_name}-{num_dirs}-runs.pyperf.jsonl'
-    )
-    print(f'Processing run directories: {args.oh_output_files}')
+    print(f'Processing run directories: {len(args.oh_output_files)}')
 
     for run_dir in args.oh_output_files:
         input_file = os.path.join(run_dir, 'output.jsonl')
         if not os.path.exists(input_file):
             continue
+
         oh_format = pd.read_json(input_file, orient='records', lines=True)
         model_name = os.path.basename(run_dir)
         results = oh_format.apply(convert_row_to_pyperf_format, axis=1)
-        all_results.append(results)
 
-    if all_results:
-        combined_results = pd.concat(all_results, ignore_index=True)
-        combined_results.to_json(output_filepath, lines=True, orient='records')
-        print(f'Wrote combined results to {output_filepath}')
+        output_filepath = os.path.join(run_dir, 'output.pyperf.jsonl')
+        results.to_json(output_filepath, lines=True, orient='records')
+        print(f'Wrote results to {output_filepath}')
+
 else:
     output_filepath = args.oh_output_files[0].replace('.jsonl', '.pyperf.jsonl')
     print(f'Converting {args.oh_output_files[0]} to {output_filepath}')
