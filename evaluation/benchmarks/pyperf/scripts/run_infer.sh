@@ -3,52 +3,86 @@ set -eo pipefail
 
 source "evaluation/utils/version_control.sh"
 
-MODEL_CONFIG=$1
-COMMIT_HASH=$2
-AGENT=$3
-EVAL_LIMIT=$4
-MAX_ITER=$5
-NUM_WORKERS=$6
-DATASET=$7
-SPLIT=$8
-N_RUNS=$9
+# Default values
+AGENT="CodeActAgent"
+MAX_ITER=100
+NUM_WORKERS=1
+DATASET="manishs/pyperf_pandas"
+SPLIT="test"
+USE_INSTANCE_IMAGE=true
+RUN_WITH_BROWSING=false
+N_RUNS=1
+USE_HINT_TEXT=false
 
-if [ -z "$NUM_WORKERS" ]; then
-  NUM_WORKERS=1
-  echo "Number of workers not specified, use default $NUM_WORKERS"
+# Parse named arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --model-config)
+      MODEL_CONFIG="$2"
+      shift 2
+      ;;
+    --commit-hash)
+      COMMIT_HASH="$2"
+      shift 2
+      ;;
+    --agent)
+      AGENT="$2"
+      shift 2
+      ;;
+    --eval-limit)
+      EVAL_LIMIT="$2"
+      shift 2
+      ;;
+    --max-iter)
+      MAX_ITER="$2"
+      shift 2
+      ;;
+    --num-workers)
+      NUM_WORKERS="$2"
+      shift 2
+      ;;
+    --dataset)
+      DATASET="$2"
+      shift 2
+      ;;
+    --split)
+      SPLIT="$2"
+      shift 2
+      ;;
+    --n-runs)
+      N_RUNS="$2"
+      shift 2
+      ;;
+    --use-instance-image)
+      USE_INSTANCE_IMAGE="$2"
+      shift 2
+      ;;
+    --run-with-browsing)
+      RUN_WITH_BROWSING="$2"
+      shift 2
+      ;;
+    --use-hint-text)
+      USE_HINT_TEXT="$2"
+      shift 2
+      ;;
+    --exp-name)
+      EXP_NAME="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Validate required arguments
+if [ -z "$MODEL_CONFIG" ]; then
+  echo "Error: --model-config is required"
+  exit 1
 fi
+
 checkout_eval_branch
-
-if [ -z "$AGENT" ]; then
-  echo "Agent not specified, use default CodeActAgent"
-  AGENT="CodeActAgent"
-fi
-
-if [ -z "$MAX_ITER" ]; then
-  echo "MAX_ITER not specified, use default 100"
-  MAX_ITER=100
-fi
-
-if [ -z "$USE_INSTANCE_IMAGE" ]; then
-  echo "USE_INSTANCE_IMAGE not specified, use default true"
-  USE_INSTANCE_IMAGE=true
-fi
-
-if [ -z "$RUN_WITH_BROWSING" ]; then
-  echo "RUN_WITH_BROWSING not specified, use default false"
-  RUN_WITH_BROWSING=false
-fi
-
-
-if [ -z "$DATASET" ]; then
-  echo "DATASET not specified, use default manishs/pyperf_pandas"
-  DATASET="manishs/pyperf_pandas"
-fi
-
-if [ -z "$SPLIT" ]; then
-  echo "SPLIT not specified, use default test"
-  SPLIT="test"
-fi
 
 export USE_INSTANCE_IMAGE=$USE_INSTANCE_IMAGE
 echo "USE_INSTANCE_IMAGE: $USE_INSTANCE_IMAGE"
@@ -63,10 +97,6 @@ echo "MODEL_CONFIG: $MODEL_CONFIG"
 echo "DATASET: $DATASET"
 echo "SPLIT: $SPLIT"
 
-# Default to NOT use Hint
-if [ -z "$USE_HINT_TEXT" ]; then
-  export USE_HINT_TEXT=false
-fi
 echo "USE_HINT_TEXT: $USE_HINT_TEXT"
 EVAL_NOTE="$OPENHANDS_VERSION"
 # if not using Hint, add -no-hint to the eval note
@@ -103,10 +133,6 @@ function run_eval() {
 }
 
 unset SANDBOX_ENV_GITHUB_TOKEN # prevent the agent from using the github token to push
-if [ -z "$N_RUNS" ]; then
-  N_RUNS=1
-  echo "N_RUNS not specified, use default $N_RUNS"
-fi
 
 # Skip runs if the run number is in the SKIP_RUNS list
 # read from env variable SKIP_RUNS as a comma separated list of run numbers

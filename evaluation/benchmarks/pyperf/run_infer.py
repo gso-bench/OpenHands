@@ -408,7 +408,7 @@ def process_instance(
         if is_fatal_evaluation_error(state.last_error):
             raise EvalException('Fatal error detected: ' + state.last_error)
 
-        # ======= THIS IS PYPERF-Bench specific =======
+        # ======= THIS IS PYPERF specific =======
         # Get git patch
         return_val = complete_runtime(runtime, instance)
         git_patch = return_val['git_patch']
@@ -419,19 +419,11 @@ def process_instance(
         runtime.close()
     # ==========================================
 
-    # ======= Attempt to evaluate the agent's edits =======
-    # we use eval_infer.sh to evaluate the agent's edits, not here
-    # because the agent may alter the environment / testcases
-    test_result = {
-        'git_patch': git_patch,
-    }
+    test_result = {'git_patch': git_patch}
 
-    # If you are working on some simpler benchmark that only evaluates the final model output (e.g., in a MessageAction)
-    # You can simply get the LAST `MessageAction` from the returned `state.history` and parse it for evaluation.
     if state is None:
         raise ValueError('State should not be None.')
 
-    # NOTE: this is NO LONGER the event stream, but an agent history that includes delegate agent's events
     histories = [event_to_dict(event) for event in state.history]
     metrics = get_metrics(state)
 
@@ -520,12 +512,6 @@ if __name__ == '__main__':
     output_file = os.path.join(metadata.eval_output_dir, 'output.jsonl')
     print(f'### OUTPUT FILE: {output_file} ###')
     instances = prepare_dataset(pyperf_tests, output_file, args.eval_n_limit)
-
-    # if len(instances) > 0 and not isinstance(
-    #     instances['PASS_TO_PASS'][instances['PASS_TO_PASS'].index[0]], str
-    # ):
-    #     for col in ['PASS_TO_PASS', 'FAIL_TO_PASS']:
-    #         instances[col] = instances[col].apply(lambda x: str(x))
 
     run_evaluation(
         instances,
