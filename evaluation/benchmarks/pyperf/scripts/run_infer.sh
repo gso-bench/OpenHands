@@ -5,7 +5,7 @@ source "evaluation/utils/version_control.sh"
 
 # Default values
 AGENT="CodeActAgent"
-MAX_ITER=100
+MAX_ITER=50
 NUM_WORKERS=1
 DATASET="manishs/pyperf_pandas"
 SPLIT="test"
