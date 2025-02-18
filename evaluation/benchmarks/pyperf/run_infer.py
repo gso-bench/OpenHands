@@ -43,15 +43,36 @@ from openhands.utils.shutdown_listener import sleep_if_should_continue
 
 USE_HINT_TEXT = os.environ.get('USE_HINT_TEXT', 'false').lower() == 'true'
 RUN_WITH_BROWSING = os.environ.get('RUN_WITH_BROWSING', 'false').lower() == 'true'
-
+USE_INSTALL_COMMANDS = True
 
 AGENT_CLS_TO_FAKE_USER_RESPONSE_FN = {
     'CodeActAgent': codeact_user_response,
 }
 
+DOCKER_IMAGE_PREFIX = os.environ.get(
+    'EVAL_DOCKER_IMAGE_PREFIX', 'docker.io/slimshetty/'
+)
+logger.info(f'Using docker image prefix: {DOCKER_IMAGE_PREFIX}')
+
+
+def _get_pyperf_instance_docker_image(instance_id: str) -> str:
+    image_name = 'pyperf-pandas:pyperf.eval.x86_64.' + instance_id
+    return (DOCKER_IMAGE_PREFIX.rstrip('/') + '/' + image_name).lower()
+
 
 def _get_pyperf_workspace_dir_name(instance: pd.Series) -> str:
     return f'{instance.repo}'.replace('/', '__')
+
+
+def _get_pyperf_repo_install_script(instance: pd.Series) -> str:
+    filter_set = ['git clean -xfd', 'which python', 'python --version', 'uv venv']
+    install_cmds = instance.install_commands
+    return [
+        cmd for cmd in install_cmds if not any(cmd.startswith(f) for f in filter_set)
+    ]
+
+
+############################################## MAIN SCRIPT ######################################################
 
 
 def get_instruction(instance: pd.Series, metadata: EvalMetadata):
@@ -76,6 +97,12 @@ def get_instruction(instance: pd.Series, metadata: EvalMetadata):
         "Your thinking should be thorough and so it's fine if it's very long.\n"
     )
 
+    if USE_INSTALL_COMMANDS:
+        instruction += (
+            f'\nTo rebuild the repo with your changes at any point, you can use the following in the {workspace_dir_name} directory:\n'
+            f'```\n{instance['install_commands']}\n```\n'
+        )
+
     if RUN_WITH_BROWSING:
         instruction += (
             '<IMPORTANT!>\n'
@@ -85,25 +112,11 @@ def get_instruction(instance: pd.Series, metadata: EvalMetadata):
     return instruction
 
 
-DOCKER_IMAGE_PREFIX = os.environ.get(
-    'EVAL_DOCKER_IMAGE_PREFIX', 'docker.io/slimshetty/'
-)
-logger.info(f'Using docker image prefix: {DOCKER_IMAGE_PREFIX}')
-
-
-def get_instance_docker_image(instance_id: str) -> str:
-    image_name = 'pyperf-pandas:pyperf.eval.x86_64.' + instance_id
-    # image_name = image_name.replace(
-    #     '__', '_s_'
-    # )  # to comply with docker image naming convention
-    return (DOCKER_IMAGE_PREFIX.rstrip('/') + '/' + image_name).lower()
-
-
 def get_config(
     instance: pd.Series,
     metadata: EvalMetadata,
 ) -> AppConfig:
-    base_container_image = get_instance_docker_image(instance['instance_id'])
+    base_container_image = _get_pyperf_instance_docker_image(instance['instance_id'])
     logger.info(
         f'Using instance container image: {base_container_image}. '
         f'Please make sure this image exists. '
@@ -366,8 +379,11 @@ def process_instance(
 ) -> EvalOutput:
     config = get_config(instance, metadata)
 
-    # TODO: don't store non json serializable stuff
-    instance = instance[~instance.apply(lambda x: isinstance(x, np.ndarray))]
+    # format install commands
+    instance['install_commands'] = _get_pyperf_repo_install_script(instance)
+    instance = instance.apply(
+        lambda x: ('\n'.join(x) if isinstance(x, (np.ndarray, list)) else x)
+    )
 
     # Setup the logger properly, so you can run multi-processing to parallelize the evaluation
     if reset_logger:
@@ -376,15 +392,6 @@ def process_instance(
     else:
         logger.info(f'Starting evaluation for instance {instance.instance_id}.')
 
-    # # Increase resource_factor with increasing attempt_id
-    # if runtime_failure_count > 0:
-    #     config.sandbox.remote_runtime_resource_factor = min(
-    #         config.sandbox.remote_runtime_resource_factor * (2**runtime_failure_count),
-    #         8,
-    #     )
-    #     logger.warning(
-    #         f'This is the {runtime_failure_count + 1}th attempt for instance {instance.instance_id}, setting resource factor to {config.sandbox.remote_runtime_resource_factor}'
-    #     )
     runtime = create_runtime(config)
     call_async_from_sync(runtime.connect)
 
