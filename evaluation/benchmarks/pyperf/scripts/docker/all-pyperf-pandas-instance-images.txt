@@ -2,3 +2,9 @@ pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-9b4cffc
 pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-233bd83
 pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-061c2e9
 pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-ccca5df
+pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-2cdca01
+pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-b661313
+pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-1ae00c6
+pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-e8961f1
+pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-84aca21
+pyperf-pandas:pyperf.eval.x86_64.pandas-dev__pandas-2f4c93e
