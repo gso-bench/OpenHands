@@ -83,8 +83,4 @@ def previous_conversation(log_path):
 
 
 if __name__ == '__main__':
-    # Load your JSONL file here
-    # output_path = 'evaluation/evaluation_outputs/outputs/manishs__pyperf_pandas-test/CodeActAgent/gpt-4o_maxiter_100_N_v0.23.0-no-hint-run_1/output.jsonl'
-    # output_path = 'evaluation/evaluation_outputs/outputs/manishs__pyperf_pandas-test/CodeActAgent/claude-3-5-sonnet-v2-20241022_maxiter_100_N_v0.23.0-no-hint-run_1/output.jsonl'
-    # load_jsonl(output_path)
     app.run(debug=True, host='0.0.0.0', port=5760)
