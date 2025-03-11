@@ -7,7 +7,7 @@ source "evaluation/utils/version_control.sh"
 AGENT="CodeActAgent"
 MAX_ITER=50
 NUM_WORKERS=1
-DATASET="manishs/pyperf_pandas"
+DATASET="manishs/pyperf"
 SPLIT="test"
 USE_INSTANCE_IMAGE=true
 RUN_WITH_BROWSING=false
