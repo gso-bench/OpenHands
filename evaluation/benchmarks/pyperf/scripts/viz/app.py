@@ -16,6 +16,10 @@ def get_available_logs():
         for file in files:
             # jsonl file with name output.jsonl
             if file.endswith('.jsonl') and file == 'output.jsonl':
+                # ignore if archive is in the file path
+                if 'archives' in root:
+                    continue
+
                 # Get relative path from LOGS_DIR
                 rel_path = os.path.relpath(os.path.join(root, file), LOGS_DIR)
                 log_files.append(rel_path)
