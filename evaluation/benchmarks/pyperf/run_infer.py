@@ -64,12 +64,18 @@ def _get_pyperf_workspace_dir_name(instance: pd.Series) -> str:
     return f'{instance.repo}'.replace('/', '__')
 
 
-def _get_pyperf_repo_install_script(instance: pd.Series) -> str:
+def _get_pyperf_repo_install_script(instance: pd.Series) -> list[str]:
     filter_set = ['git clean -xfd', 'which python', 'python --version', 'uv venv']
     install_cmds = instance.install_commands
-    return [
+    filtered_cmds = [
         cmd for cmd in install_cmds if not any(cmd.startswith(f) for f in filter_set)
     ]
+
+    # also strip 'git clean -xfd' if it is part of any command
+    filtered_cmds = [
+        cmd.replace('git clean -xfd &&', '').strip() for cmd in filtered_cmds
+    ]
+    return filtered_cmds
 
 
 ############################################## MAIN SCRIPT ######################################################
