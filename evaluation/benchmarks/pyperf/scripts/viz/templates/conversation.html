@@ -54,8 +54,8 @@
         .history-item.agent {
             border-left: 4px solid #28a745;
         }
-        .history-item.human {
-            border-left: 4px solid #007bff;
+        .history-item.observation {
+            border-left: 4px solid #47a0ff;
         }
         .metadata {
             margin-bottom: 20px;
@@ -205,9 +205,32 @@
             document.getElementById('pagination').textContent = `Conversation ${currentIndex + 1} of ${total}`;
         }
 
+        function updateUrlWithInstanceId(instanceId) {
+            if (instanceId) {
+                // Get the base path (without instance_id if present)
+                let basePath = window.location.pathname;
+                if (basePath.includes('/output.jsonl')) {
+                    basePath = basePath.replace('/output.jsonl', '');
+                } else {
+                    // Remove any existing instance ID
+                    const pathParts = basePath.split('/');
+                    basePath = pathParts.slice(0, -1).join('/');
+                }
+
+                // Create new URL with instance ID
+                const newUrl = `${basePath}/${instanceId}`;
+                window.history.pushState({}, '', newUrl);
+            }
+        }
+
         function displayConversation(data) {
             const conversation = data.conversation;
             updateButtons(data.current_index, data.total);
+
+            // Update URL with instance ID
+            if (data.instance_id) {
+                updateUrlWithInstanceId(data.instance_id);
+            }
 
             // Display metadata
             const metadataHtml = `
@@ -232,10 +255,14 @@
                     // If this is a response item, add its content to the previous item
                     if (index > 0) {
                         acc += `
-                            <div class="response-content">
-                                ${item.observation ? `<strong>Observation:</strong>` : ''}
-                                ${item.message ? `<div class="response-message">${item.message}</div>` : ''}
+                            <div class="history-item observation">
+                                <span class="badge">ID:${item.id}</span>
+                                <span class="badge source">observation</span>
+                                <span class="timestamp">${item.timestamp}</span>
+
+                                ${item.message ? `<pre>${item.message}</pre>` : ''}
                                 ${item.error ? `<div class="error">${item.error}</div>` : ''}
+                                ${item.content ? `<pre>${item.content}</pre>` : ''}
                             </div>
                         `;
                     }
@@ -244,6 +271,7 @@
 
                 return acc + `
                     <div class="history-item ${item.source}">
+                        <span class="badge">ID:${item.id}</span>
                         <span class="badge source">${item.source}</span>
                         <span class="badge action">${item.action}</span>
                         <span class="timestamp">${item.timestamp}</span>
@@ -253,8 +281,6 @@
                         ${item.tool_call_metadata ? formatToolCall(item.tool_call_metadata) : ''}
 
                         ${item.error ? `<div class="error">${item.error}</div>` : ''}
-
-                        ${item.observation ? `<div class="observation"><strong>Observation:</strong> ${item.observation}</div>` : ''}
                     </div>
                 `;
             }, '');
