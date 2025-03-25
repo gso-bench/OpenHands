@@ -17,7 +17,6 @@ pyperf:pyperf.eval.x86_64.numpy__numpy-28706af
 pyperf:pyperf.eval.x86_64.numpy__numpy-2dfd21e
 pyperf:pyperf.eval.x86_64.numpy__numpy-330057f
 pyperf:pyperf.eval.x86_64.numpy__numpy-382b3ff
-pyperf:pyperf.eval.x86_64.numpy__numpy-3ea71da
 pyperf:pyperf.eval.x86_64.numpy__numpy-4973914
 pyperf:pyperf.eval.x86_64.numpy__numpy-4aca866
 pyperf:pyperf.eval.x86_64.numpy__numpy-567b57d
@@ -41,7 +40,6 @@ pyperf:pyperf.eval.x86_64.numpy__numpy-be52f19
 pyperf:pyperf.eval.x86_64.numpy__numpy-cb0d7cd
 pyperf:pyperf.eval.x86_64.numpy__numpy-cb461ba
 pyperf:pyperf.eval.x86_64.numpy__numpy-cedba62
-pyperf:pyperf.eval.x86_64.numpy__numpy-d352270
 pyperf:pyperf.eval.x86_64.numpy__numpy-e0194de
 pyperf:pyperf.eval.x86_64.numpy__numpy-e801e7a
 pyperf:pyperf.eval.x86_64.numpy__numpy-eb21b25
@@ -119,5 +117,4 @@ pyperf:pyperf.eval.x86_64.tornadoweb__tornado-5cfe2fc
 pyperf:pyperf.eval.x86_64.tornadoweb__tornado-715ef05
 pyperf:pyperf.eval.x86_64.tornadoweb__tornado-9a18f6c
 pyperf:pyperf.eval.x86_64.tornadoweb__tornado-ac13ee5
-pyperf:pyperf.eval.x86_64.tornadoweb__tornado-bc74d7b
 pyperf:pyperf.eval.x86_64.tornadoweb__tornado-bf1b21a
