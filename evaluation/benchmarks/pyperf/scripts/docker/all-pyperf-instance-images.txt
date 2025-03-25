@@ -50,6 +50,7 @@ pyperf:pyperf.eval.x86_64.numpy__numpy-ec8d5db
 pyperf:pyperf.eval.x86_64.numpy__numpy-ee75c87
 pyperf:pyperf.eval.x86_64.numpy__numpy-ef5e545
 pyperf:pyperf.eval.x86_64.numpy__numpy-f69f273
+pyperf:pyperf.eval.x86_64.pandas-dev__pandas-4583a04
 pyperf:pyperf.eval.x86_64.pandas-dev__pandas-00d88e9
 pyperf:pyperf.eval.x86_64.pandas-dev__pandas-061c2e9
 pyperf:pyperf.eval.x86_64.pandas-dev__pandas-12faa2e
