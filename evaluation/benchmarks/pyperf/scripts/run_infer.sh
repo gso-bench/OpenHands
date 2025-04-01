@@ -4,6 +4,7 @@ set -eo pipefail
 source "evaluation/utils/version_control.sh"
 
 # Default values
+COMMIT_HASH="HEAD"
 AGENT="CodeActAgent"
 MAX_ITER=50
 NUM_WORKERS=1
@@ -13,6 +14,9 @@ USE_INSTANCE_IMAGE=true
 RUN_WITH_BROWSING=false
 N_RUNS=1
 USE_HINT_TEXT=false
+USE_PLANS=false
+PLAN_TYPE="none"
+PLAN_ID="none"
 
 # Parse named arguments
 while [[ $# -gt 0 ]]; do
@@ -65,6 +69,18 @@ while [[ $# -gt 0 ]]; do
       USE_HINT_TEXT="$2"
       shift 2
       ;;
+    --use-plans)
+      USE_PLANS="$2"
+      shift 2
+      ;;
+    --plan-type)
+      PLAN_TYPE="$2"
+      shift 2
+      ;;
+    --plan-id)
+      PLAN_ID="$2"
+      shift 2
+      ;;
     --exp-name)
       EXP_NAME="$2"
       shift 2
@@ -88,6 +104,13 @@ export USE_INSTANCE_IMAGE=$USE_INSTANCE_IMAGE
 echo "USE_INSTANCE_IMAGE: $USE_INSTANCE_IMAGE"
 export RUN_WITH_BROWSING=$RUN_WITH_BROWSING
 echo "RUN_WITH_BROWSING: $RUN_WITH_BROWSING"
+export USE_PLANS=$USE_PLANS
+echo "USE_PLANS: $USE_PLANS"
+export PLAN_TYPE=$PLAN_TYPE
+echo "PLAN_TYPE: $PLAN_TYPE"
+export PLAN_ID=$PLAN_ID
+echo "PLAN_ID: $PLAN_ID"
+
 
 get_openhands_version
 
@@ -102,6 +125,13 @@ EVAL_NOTE="$OPENHANDS_VERSION"
 # if not using Hint, add -no-hint to the eval note
 if [ "$USE_HINT_TEXT" = false ]; then
   EVAL_NOTE="$EVAL_NOTE-no-hint"
+fi
+
+if [ "$USE_PLANS" = true ]; then
+  echo "USE_PLANS: $USE_PLANS"
+  echo "PLAN_TYPE: $PLAN_TYPE"
+  echo "PLAN_ID: $PLAN_ID"
+  EVAL_NOTE="$EVAL_NOTE-$PLAN_TYPE-$PLAN_ID"
 fi
 
 if [ "$RUN_WITH_BROWSING" = true ]; then

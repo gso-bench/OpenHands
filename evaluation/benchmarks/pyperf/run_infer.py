@@ -14,6 +14,7 @@ from evaluation.benchmarks.pyperf.helpers import (
     DOCKER_IMAGE_PREFIX,
     RUN_WITH_BROWSING,
     _get_pyperf_instance_docker_image,
+    _get_pyperf_plan,
     _get_pyperf_repo_install_script,
     _get_pyperf_workspace_dir_name,
     get_instruction,
@@ -49,6 +50,7 @@ from openhands.runtime.base import Runtime
 from openhands.utils.async_utils import call_async_from_sync
 from openhands.utils.shutdown_listener import sleep_if_should_continue
 
+USE_PLANS = os.environ.get('USE_PLANS', 'false').lower() == 'true'
 AGENT_CLS_TO_FAKE_USER_RESPONSE_FN = {
     'CodeActAgent': codeact_user_response,
 }
@@ -317,6 +319,8 @@ def process_instance(
 
     # format install commands
     instance['install_commands'] = _get_pyperf_repo_install_script(instance)
+    if USE_PLANS:
+        instance['plan'] = _get_pyperf_plan(instance)
     instance = instance.apply(
         lambda x: ('\n'.join(x) if isinstance(x, (np.ndarray, list)) else x)
     )

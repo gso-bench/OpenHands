@@ -4,6 +4,9 @@ import pandas as pd
 
 from evaluation.utils.shared import EvalMetadata
 
+USE_PLANS = os.environ.get('USE_PLANS', 'false').lower() == 'true'
+PLAN_TYPE = os.environ.get('PLAN_TYPE', None)
+PLAN_ID = int(os.environ.get('PLAN_ID', 0))
 USE_HINT_TEXT = os.environ.get('USE_HINT_TEXT', 'false').lower() == 'true'
 RUN_WITH_BROWSING = os.environ.get('RUN_WITH_BROWSING', 'false').lower() == 'true'
 USE_INSTALL_COMMANDS = True
@@ -35,6 +38,10 @@ def _get_pyperf_repo_install_script(instance: pd.Series) -> list[str]:
     return filtered_cmds
 
 
+def _get_pyperf_plan(instance: pd.Series) -> str:
+    return instance[PLAN_TYPE][PLAN_ID].strip()
+
+
 def get_instruction(instance: pd.Series, metadata: EvalMetadata):
     workspace_dir_name = _get_pyperf_workspace_dir_name(instance)
     # Prepare instruction
@@ -61,6 +68,12 @@ def get_instruction(instance: pd.Series, metadata: EvalMetadata):
         instruction += (
             f'\nTo rebuild the repo with your changes at any point, you can use the following in the {workspace_dir_name} directory:\n'
             f'```\n{instance['install_commands']}\n```\n'
+        )
+
+    if USE_PLANS:
+        instruction += (
+            '\nHere is a plan to help you with the optimization task:\n'
+            f'{instance.plan}\n'
         )
 
     if RUN_WITH_BROWSING:
