@@ -10,6 +10,15 @@ import toml
 from datasets import load_dataset
 
 import openhands.agenthub
+from evaluation.benchmarks.pyperf.helpers import (
+    DOCKER_IMAGE_PREFIX,
+    RUN_WITH_BROWSING,
+    _get_pyperf_instance_docker_image,
+    _get_pyperf_plan,
+    _get_pyperf_repo_install_script,
+    _get_pyperf_workspace_dir_name,
+    get_instruction,
+)
 from evaluation.utils.shared import (
     EvalException,
     EvalMetadata,
@@ -41,81 +50,14 @@ from openhands.runtime.base import Runtime
 from openhands.utils.async_utils import call_async_from_sync
 from openhands.utils.shutdown_listener import sleep_if_should_continue
 
-USE_HINT_TEXT = os.environ.get('USE_HINT_TEXT', 'false').lower() == 'true'
-RUN_WITH_BROWSING = os.environ.get('RUN_WITH_BROWSING', 'false').lower() == 'true'
-USE_INSTALL_COMMANDS = True
-
+USE_PLANS = os.environ.get('USE_PLANS', 'false').lower() == 'true'
 AGENT_CLS_TO_FAKE_USER_RESPONSE_FN = {
     'CodeActAgent': codeact_user_response,
 }
-
-DOCKER_IMAGE_PREFIX = os.environ.get(
-    'EVAL_DOCKER_IMAGE_PREFIX', 'docker.io/slimshetty/'
-)
 logger.info(f'Using docker image prefix: {DOCKER_IMAGE_PREFIX}')
 
 
-def _get_pyperf_instance_docker_image(instance_id: str) -> str:
-    image_name = 'pyperf:pyperf.eval.x86_64.' + instance_id
-    return (DOCKER_IMAGE_PREFIX.rstrip('/') + '/' + image_name).lower()
-
-
-def _get_pyperf_workspace_dir_name(instance: pd.Series) -> str:
-    return f'{instance.repo}'.replace('/', '__')
-
-
-def _get_pyperf_repo_install_script(instance: pd.Series) -> list[str]:
-    filter_set = ['git clean -xfd', 'which python', 'python --version', 'uv venv']
-    install_cmds = instance.install_commands
-    filtered_cmds = [
-        cmd for cmd in install_cmds if not any(cmd.startswith(f) for f in filter_set)
-    ]
-
-    # also strip 'git clean -xfd' if it is part of any command
-    filtered_cmds = [
-        cmd.replace('git clean -xfd &&', '').strip() for cmd in filtered_cmds
-    ]
-    return filtered_cmds
-
-
 ############################################## MAIN SCRIPT ######################################################
-
-
-def get_instruction(instance: pd.Series, metadata: EvalMetadata):
-    workspace_dir_name = _get_pyperf_workspace_dir_name(instance)
-    # Prepare instruction
-    instruction = (
-        '<uploaded_files>\n'
-        f'/workspace/{workspace_dir_name}\n'
-        '</uploaded_files>\n'
-        f"I've uploaded a python code repository in the directory {workspace_dir_name}. Consider the following test script showing an example usage of the repository:\n\n"
-        f'<test_script>\n'
-        f'{instance.prob_script}\n'
-        '</test_script>\n\n'
-        'Can you help me implement the necessary changes to the repository so that the runtime of the <test_script> is optimized?\n'
-        'Your task is to make changes to non-tests files in the /workspace directory to improve the performance of the <test_script>.\n'
-        'While making changes you must ensuring the repository is functionally equivalent to the original.\n'
-        'Follow these steps to improve performance:\n'
-        '1. As a first step, it might be a good idea to explore the repo to familiarize yourself with its structure.\n'
-        '2. Create a script in the /workspace directory (e.g., /workspace/test_opt.py) to reproduce and time the example and execute it with `python /workspace/<filename.py>` using the BashTool.\n'
-        '3. Edit the sourcecode of the repo to improve the performance\n'
-        '4. Rerun your script and confirm that the performance has improved!\n'
-        "Your thinking should be thorough and so it's fine if it's very long.\n"
-    )
-
-    if USE_INSTALL_COMMANDS:
-        instruction += (
-            f'\nTo rebuild the repo with your changes at any point, you can use the following in the {workspace_dir_name} directory:\n'
-            f'```\n{instance['install_commands']}\n```\n'
-        )
-
-    if RUN_WITH_BROWSING:
-        instruction += (
-            '<IMPORTANT!>\n'
-            'You SHOULD NEVER attempt to browse the web. '
-            '</IMPORTANT!>\n'
-        )
-    return instruction
 
 
 def get_config(
@@ -123,12 +65,6 @@ def get_config(
     metadata: EvalMetadata,
 ) -> AppConfig:
     base_container_image = _get_pyperf_instance_docker_image(instance['instance_id'])
-    logger.info(
-        f'Using instance container image: {base_container_image}. '
-        f'Please make sure this image exists. '
-        f'Submit an issue on https://github.com/All-Hands-AI/OpenHands if you run into any issues.'
-    )
-
     config = AppConfig(
         default_agent=metadata.agent_class,
         run_as_openhands=False,
@@ -147,10 +83,6 @@ def get_config(
             keep_runtime_alive=False,
             remote_runtime_init_timeout=3600,
             remote_runtime_api_timeout=120,
-            # remote_runtime_resource_factor=get_instance_resource_factor(
-            #     dataset_name=metadata.dataset,
-            #     instance_id=instance['instance_id'],
-            # ),
             remote_runtime_enable_retries=True,
         ),
         # do not mount workspace
@@ -387,6 +319,8 @@ def process_instance(
 
     # format install commands
     instance['install_commands'] = _get_pyperf_repo_install_script(instance)
+    if USE_PLANS:
+        instance['plan'] = _get_pyperf_plan(instance)
     instance = instance.apply(
         lambda x: ('\n'.join(x) if isinstance(x, (np.ndarray, list)) else x)
     )
