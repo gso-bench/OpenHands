@@ -71,12 +71,12 @@ def get_instruction(instance: pd.Series, metadata: EvalMetadata):
         )
 
     if USE_PLANS:
-        instruction += (
-            '\nHere is a plan to help you with the optimization task:\n'
-            f'{instance.plan}\n\n'
-            'The following files are relevant to the plan:\n'
-            f'{instance.gt_files_changed}\n'
-        )
+        instruction += f'\nHere is a plan to help you with the optimization task:\n{instance.plan}\n\n'
+        # if instance.gt_files_changed.strip():
+        #     instruction += (
+        #         'The following files are relevant to the plan:\n'
+        #         f'{instance.gt_files_changed}\n'
+        #     )
 
     if RUN_WITH_BROWSING:
         instruction += (
