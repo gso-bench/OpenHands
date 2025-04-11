@@ -75,7 +75,7 @@ def get_config(
             enable_auto_lint=True,
             use_host_network=False,
             # large enough timeout, since some testcases take very long to run
-            timeout=300,
+            timeout=600,
             # Add platform to the sandbox config to solve issue 4401
             platform='linux/amd64',
             api_key=os.environ.get('ALLHANDS_API_KEY', None),
