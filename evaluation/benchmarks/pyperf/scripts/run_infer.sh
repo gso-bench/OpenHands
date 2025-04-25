@@ -16,7 +16,7 @@ N_RUNS=1
 USE_HINT_TEXT=false
 USE_PLANS=false
 PLAN_TYPE="none"
-PLAN_ID="none"
+PLAN_ID=0
 
 # Parse named arguments
 while [[ $# -gt 0 ]]; do

@@ -61,6 +61,7 @@ FUNCTION_CALLING_SUPPORTED_MODELS = [
     'o1-2024-12-17',
     'o3-mini-2025-01-31',
     'o3-mini',
+    'o4-mini',
 ]
 
 REASONING_EFFORT_SUPPORTED_MODELS = [
@@ -68,12 +69,10 @@ REASONING_EFFORT_SUPPORTED_MODELS = [
     'o1',
     'o3-mini-2025-01-31',
     'o3-mini',
+    'o4-mini',
 ]
 
-MODELS_WITHOUT_STOP_WORDS = [
-    'o1-mini',
-    'o1-preview',
-]
+MODELS_WITHOUT_STOP_WORDS = ['o1-mini', 'o1-preview', 'o4-mini']
 
 
 class LLM(RetryMixin, DebugMixin):
