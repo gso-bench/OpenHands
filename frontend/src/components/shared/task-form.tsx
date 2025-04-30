@@ -52,11 +52,11 @@ export function TaskForm({ ref }: TaskFormProps) {
     const formData = new FormData(event.currentTarget);
 
     const q = formData.get("q")?.toString();
-    createConversation({ q });
+    createConversation({ q, conversation_trigger: "gui" });
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col gap-1 w-full">
       <form
         ref={ref}
         onSubmit={handleSubmit}
@@ -70,7 +70,7 @@ export function TaskForm({ ref }: TaskFormProps) {
         <div
           className={cn(
             "border border-neutral-600 px-4 rounded-lg text-[17px] leading-5 w-full transition-colors duration-200",
-            inputIsFocused ? "bg-neutral-600" : "bg-neutral-700",
+            inputIsFocused ? "bg-neutral-600" : "bg-tertiary",
             "hover:border-neutral-500 focus-within:border-neutral-500",
           )}
         >
