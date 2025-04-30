@@ -10,6 +10,10 @@ import toml
 from datasets import load_dataset
 
 import openhands.agenthub
+from evaluation.benchmarks.swe_bench.binary_patch_utils import (
+    remove_binary_diffs,
+    remove_binary_files_from_git,
+)
 from evaluation.benchmarks.pyperf.helpers import (
     DOCKER_IMAGE_PREFIX,
     RUN_WITH_BROWSING,
@@ -43,8 +47,12 @@ from openhands.core.config import (
 )
 from openhands.core.logger import openhands_logger as logger
 from openhands.core.main import create_runtime, run_controller
-from openhands.events.action import CmdRunAction, MessageAction
-from openhands.events.observation import CmdOutputObservation, ErrorObservation
+from openhands.events.action import CmdRunAction, FileReadAction, MessageAction
+from openhands.events.observation import (
+    CmdOutputObservation,
+    ErrorObservation,
+    FileReadObservation,
+)
 from openhands.events.serialization.event import event_to_dict
 from openhands.runtime.base import Runtime
 from openhands.utils.async_utils import call_async_from_sync
@@ -95,9 +103,9 @@ def get_config(
         )
     )
     agent_config = AgentConfig(
-        codeact_enable_jupyter=False,
-        codeact_enable_browsing=RUN_WITH_BROWSING,
-        codeact_enable_llm_editor=False,
+        enable_jupyter=False,
+        enable_browsing=RUN_WITH_BROWSING,
+        enable_llm_editor=False,
         condenser=metadata.condenser_config,
         enable_prompt_extensions=False,
     )
@@ -105,10 +113,7 @@ def get_config(
     return config
 
 
-def initialize_runtime(
-    runtime: Runtime,
-    instance: pd.Series,  # this argument is not required
-):
+def initialize_runtime(runtime: Runtime, instance: pd.Series):
     """Initialize the runtime for the agent.
 
     This function is called before the runtime is used to run the agent.
@@ -231,10 +236,7 @@ def initialize_runtime(
     logger.info('-' * 30)
 
 
-def complete_runtime(
-    runtime: Runtime,
-    instance: pd.Series,  # this argument is not required, but it is used to get the workspace_dir_name
-) -> dict[str, Any]:
+def complete_runtime(runtime: Runtime, instance: pd.Series) -> dict[str, Any]:
     """Complete the runtime for the agent.
 
     This function is called before the runtime is used to run the agent.
@@ -277,11 +279,22 @@ def complete_runtime(
         f'Failed to git add -A: {str(obs)}',
     )
 
+    # Remove binary files from git staging
+    action = CmdRunAction(command=remove_binary_files_from_git())
+    action.set_hard_timeout(600)
+    logger.info(action, extra={'msg_type': 'ACTION'})
+    obs = runtime.run_action(action)
+    logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+    assert_and_raise(
+        isinstance(obs, CmdOutputObservation) and obs.exit_code == 0,
+        f'Failed to remove binary files: {str(obs)}',
+    )
+
     n_retries = 0
     git_patch = None
     while n_retries < 5:
         action = CmdRunAction(
-            command=f'git diff --no-color --cached {instance["base_commit"]}'
+            command=f'git diff --no-color --cached {instance["base_commit"]} > patch.diff'
         )
         action.set_hard_timeout(max(300 + 100 * n_retries, 600))
         logger.info(action, extra={'msg_type': 'ACTION'})
@@ -290,8 +303,28 @@ def complete_runtime(
         n_retries += 1
         if isinstance(obs, CmdOutputObservation):
             if obs.exit_code == 0:
-                git_patch = obs.content.strip()
-                break
+                # Read the patch file
+                action = FileReadAction(path='patch.diff')
+                action.set_hard_timeout(max(300 + 100 * n_retries, 600))
+                logger.info(action, extra={'msg_type': 'ACTION'})
+                obs = runtime.run_action(action)
+                logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+                if isinstance(obs, FileReadObservation):
+                    git_patch = obs.content
+                    break
+                elif isinstance(obs, ErrorObservation):
+                    # Fall back to cat "patch.diff" to get the patch
+                    assert 'File could not be decoded as utf-8' in obs.content
+                    action = CmdRunAction(command='cat patch.diff')
+                    action.set_hard_timeout(max(300 + 100 * n_retries, 600))
+                    logger.info(action, extra={'msg_type': 'ACTION'})
+                    obs = runtime.run_action(action)
+                    assert isinstance(obs, CmdOutputObservation) and obs.exit_code == 0
+                    logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+                    git_patch = obs.content
+                    break
+                else:
+                    assert_and_raise(False, f'Unexpected observation type: {str(obs)}')
             else:
                 logger.info('Failed to get git diff, retrying...')
                 sleep_if_should_continue(10)
@@ -302,6 +335,9 @@ def complete_runtime(
             assert_and_raise(False, f'Unexpected observation type: {str(obs)}')
 
     assert_and_raise(git_patch is not None, 'Failed to get git diff (None)')
+
+    # Remove binary diffs from the patch
+    git_patch = remove_binary_diffs(git_patch)
 
     logger.info('-' * 30)
     logger.info('END Runtime Completion Fn')
@@ -466,6 +502,6 @@ if __name__ == '__main__':
         output_file,
         args.eval_num_workers,
         process_instance,
-        timeout_seconds=120 * 60,  # 2 hour PER instance should be more than enough
+        timeout_seconds=2 * 60 * 60,  # 2 hour PER instance should be more than enough
         max_retries=5,
     )
