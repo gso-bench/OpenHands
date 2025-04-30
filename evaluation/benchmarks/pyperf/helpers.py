@@ -68,6 +68,7 @@ def get_instruction(instance: pd.Series, metadata: EvalMetadata):
         instruction += (
             f'\nTo rebuild the repo with your changes at any point, you can use the following in the {workspace_dir_name} directory:\n'
             f'```\n{instance['install_commands']}\n```\n'
+            'Note: some rebuilds may take time to run, so be patient with running them.\n'
         )
 
     if USE_PLANS:
