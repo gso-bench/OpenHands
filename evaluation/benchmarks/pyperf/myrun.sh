@@ -1,89 +1,67 @@
 #!/bin/bash
 set -eo pipefail
 
-# # Short Plan 0
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 0
+########### Inference-time scaling [steps] ###########
+
+# --------- o4-mini ---------
+
+# o4-mini + Max Steps 50
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o4-mini --commit-hash HEAD --agent CodeActAgent --num-workers 60 --n-runs 1 --max-iter 50
 # docker container prune -f
 
-# # Short Plan 1
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 1
+# o4-mini + Max Steps 100
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o4-mini --commit-hash HEAD --agent CodeActAgent --num-workers 60 --n-runs 1 --max-iter 100
 # docker container prune -f
 
-# # Short Plan 2
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 2
+# o4-mini + Max Steps 200
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o4-mini --commit-hash HEAD --agent CodeActAgent --num-workers 60 --n-runs 1 --max-iter 200
 # docker container prune -f
 
-# # Short Plan 3
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 3
+# o4-mini + Max Steps 400
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o4-mini --commit-hash HEAD --agent CodeActAgent --num-workers 60 --n-runs 1 --max-iter 400
 # docker container prune -f
 
-# # Short Plan 4
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 4
+# o4-mini + Max Steps 800
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o4-mini --commit-hash HEAD --agent CodeActAgent --num-workers 60 --n-runs 1 --max-iter 800
 # docker container prune -f
 
-
-# # Detailed Plan 0
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 0
+# o4-mini + Max Steps 1600
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o4-mini --commit-hash HEAD --agent CodeActAgent --num-workers 60 --n-runs 1 --max-iter 1600
 # docker container prune -f
 
-# # Detailed Plan 1
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 1
-# docker container prune -f
+# --------- claude3.5 ---------
 
-# # Detailed Plan 2
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 2
-# docker container prune -f
-
-# # Detailed Plan 3
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 3
-# docker container prune -f
-
-# # Detailed Plan 4
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o3-mini --dataset manishs/pyperf-planned --num-workers 60 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 4
-# docker container prune -f
-
-
-# -----------------------
-
-
-# Short Plan 0
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 0
-# docker container prune -f
-
-# # Short Plan 1
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 1
-# docker container prune -f
-
-# # Short Plan 2
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 2
-# docker container prune -f
-
-# # Short Plan 3
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 3
-# docker container prune -f
-
-# # Short Plan 4
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type short_plans --plan-id 4
-# docker container prune -f
-
-
-
-# # Detailed Plan 0
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 0
-# docker container prune -f
-
-# # Detailed Plan 1
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 1
-# docker container prune -f
-
-# Detailed Plan 2
-./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 2
+# claude3.5 + Max Steps 50
+./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 50
 docker container prune -f
 
-# Detailed Plan 3
-./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 3
+# claude3.5 + Max Steps 100
+./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 100
 docker container prune -f
 
-# Detailed Plan 4
-./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --dataset manishs/pyperf-planned --num-workers 45 --n-runs 1 --use-plans true --plan-type detailed_plans --plan-id 4
+# claude3.5 + Max Steps 200
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 200
+# docker container prune -f
+
+# claude3.5 + Max Steps 400
+./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 400
 docker container prune -f
+
+# claude3.5 + Max Steps 800
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 800
+# docker container prune -f
+
+# claude3.5 + Max Steps 1600
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 1600
+# docker container prune -f
+
+
+########### Inference-time scaling [rollouts] ###########
+
+# o4-mini + 10 rollouts
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_o4-mini --commit-hash HEAD --agent CodeActAgent --num-workers 60 --n-runs 10 --max-iter 100
+# docker container prune -f
+
+# claude3.5 + 10 rollouts
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 10 --max-iter 100
+# docker container prune -f
