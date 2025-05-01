@@ -32,16 +32,16 @@ set -eo pipefail
 # --------- claude3.5 ---------
 
 # claude3.5 + Max Steps 50
-./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 50
-docker container prune -f
+# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 50
+# docker container prune -f
 
 # claude3.5 + Max Steps 100
 ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 100
 docker container prune -f
 
 # claude3.5 + Max Steps 200
-# ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 200
-# docker container prune -f
+./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 200
+docker container prune -f
 
 # claude3.5 + Max Steps 400
 ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_sonnet_vertex --commit-hash HEAD --agent CodeActAgent --num-workers 40 --n-runs 1 --max-iter 400
