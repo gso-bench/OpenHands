@@ -259,10 +259,25 @@ def complete_runtime(runtime: Runtime, instance: pd.Series) -> dict[str, Any]:
         # The previous command is still running
         # We need to kill previous command
         logger.info('The previous command is still running, trying to kill it...')
-        action = CmdRunAction(command='C-c')
+        action = CmdRunAction(command='C-c', is_input=True)
         obs = runtime.run_action(action)
         logger.info(obs, extra={'msg_type': 'OBSERVATION'})
         sleep_if_should_continue(5)
+
+        # Then run the command again
+        action = CmdRunAction(command=f'cd /workspace/{workspace_dir_name}')
+        action.set_hard_timeout(600)
+        logger.info(action, extra={'msg_type': 'ACTION'})
+        obs = runtime.run_action(action)
+        logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+
+    if obs.exit_code == -1:
+        # The previous command is still running
+        # We need to kill previous command
+        logger.info('The previous command is still running, trying to ctrl+z it...')
+        action = CmdRunAction(command='C-z', is_input=True)
+        obs = runtime.run_action(action)
+        logger.info(obs, extra={'msg_type': 'OBSERVATION'})
 
         # Then run the command again
         action = CmdRunAction(command=f'cd /workspace/{workspace_dir_name}')
