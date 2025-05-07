@@ -26,7 +26,11 @@ set -eo pipefail
 # docker container prune -f
 
 # claude-3.7
-# TODO
+# until ./evaluation/benchmarks/pyperf/scripts/run_infer.sh --model-config llm.eval_claude_3_7_vertex_0-1 --commit-hash HEAD --agent CodeActAgent --num-workers 5 --n-runs 3 --max-iter 100; do
+#     echo "Error occurred. Retrying in 20 seconds..."
+#     sleep 20
+# done
+# docker container prune -f
 
 # gemini-2.5-pro
 # TODO
