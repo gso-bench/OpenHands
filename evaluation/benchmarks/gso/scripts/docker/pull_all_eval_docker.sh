@@ -25,8 +25,8 @@ fi
 echo "Using namespace: $NAMESPACE"
 echo "Using parallel workers: $WORKERS"
 
-IMAGE_FILE="$(dirname "$0")/all-pyperf-instance-images.txt"
-PATTERN="pyperf.eval"
+IMAGE_FILE="$(dirname "$0")/all-gso-instance-images.txt"
+PATTERN="gso.eval"
 
 echo "Pulling docker images"
 echo "Pattern: $PATTERN"

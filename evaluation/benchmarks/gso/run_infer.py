@@ -14,13 +14,13 @@ from evaluation.benchmarks.swe_bench.binary_patch_utils import (
     remove_binary_diffs,
     remove_binary_files_from_git,
 )
-from evaluation.benchmarks.pyperf.helpers import (
+from evaluation.benchmarks.gso.helpers import (
     DOCKER_IMAGE_PREFIX,
     RUN_WITH_BROWSING,
-    _get_pyperf_instance_docker_image,
-    _get_pyperf_plan,
-    _get_pyperf_repo_install_script,
-    _get_pyperf_workspace_dir_name,
+    _get_gso_instance_docker_image,
+    _get_gso_plan,
+    _get_gso_repo_install_script,
+    _get_gso_workspace_dir_name,
     get_instruction,
 )
 from evaluation.utils.shared import (
@@ -72,7 +72,7 @@ def get_config(
     instance: pd.Series,
     metadata: EvalMetadata,
 ) -> AppConfig:
-    base_container_image = _get_pyperf_instance_docker_image(instance['instance_id'])
+    base_container_image = _get_gso_instance_docker_image(instance['instance_id'])
     config = AppConfig(
         default_agent=metadata.agent_class,
         run_as_openhands=False,
@@ -121,19 +121,19 @@ def initialize_runtime(runtime: Runtime, instance: pd.Series):
     logger.info('-' * 30)
     logger.info('BEGIN Runtime Initialization Fn')
     logger.info('-' * 30)
-    workspace_dir_name = _get_pyperf_workspace_dir_name(instance)
+    workspace_dir_name = _get_gso_workspace_dir_name(instance)
     obs: CmdOutputObservation
 
     # Set instance id
     action = CmdRunAction(
-        command=f"""echo 'export PYPERF_INSTANCE_ID={instance['instance_id']}' >> ~/.bashrc && echo 'export PIP_CACHE_DIR=~/.cache/pip' >> ~/.bashrc && echo "alias git='git --no-pager'" >> ~/.bashrc"""
+        command=f"""echo 'export GSO_INSTANCE_ID={instance['instance_id']}' >> ~/.bashrc && echo 'export PIP_CACHE_DIR=~/.cache/pip' >> ~/.bashrc && echo "alias git='git --no-pager'" >> ~/.bashrc"""
     )
     action.set_hard_timeout(600)
     logger.info(action, extra={'msg_type': 'ACTION'})
     obs = runtime.run_action(action)
     logger.info(obs, extra={'msg_type': 'OBSERVATION'})
     assert_and_raise(
-        obs.exit_code == 0, f'Failed to export PYPERF_INSTANCE_ID: {str(obs)}'
+        obs.exit_code == 0, f'Failed to export GSO_INSTANCE_ID: {str(obs)}'
     )
 
     action = CmdRunAction(command="""export USER=$(whoami); echo USER=${USER} """)
@@ -147,20 +147,20 @@ def initialize_runtime(runtime: Runtime, instance: pd.Series):
     script_dir = os.path.dirname(__file__)
 
     # inject the instance info
-    action = CmdRunAction(command='mkdir -p /pyperf_util/eval_data/instances')
+    action = CmdRunAction(command='mkdir -p /gso_util/eval_data/instances')
     action.set_hard_timeout(600)
     logger.info(action, extra={'msg_type': 'ACTION'})
     obs = runtime.run_action(action)
     logger.info(obs, extra={'msg_type': 'OBSERVATION'})
     assert_and_raise(
         obs.exit_code == 0,
-        f'Failed to create /pyperf_util/eval_data/instances: {str(obs)}',
+        f'Failed to create /gso_util/eval_data/instances: {str(obs)}',
     )
 
-    pyperf_instance_json_name = 'pyperf-instance.json'
+    gso_instance_json_name = 'gso-instance.json'
     with tempfile.TemporaryDirectory() as temp_dir:
         # Construct the full path for the desired file name within the temporary directory
-        temp_file_path = os.path.join(temp_dir, pyperf_instance_json_name)
+        temp_file_path = os.path.join(temp_dir, gso_instance_json_name)
         # Write to the file with the desired name within the temporary directory
         with open(temp_file_path, 'w') as f:
             if not isinstance(instance, dict):
@@ -169,12 +169,12 @@ def initialize_runtime(runtime: Runtime, instance: pd.Series):
                 json.dump([instance], f)
 
         # Copy the file to the desired location
-        runtime.copy_to(temp_file_path, '/pyperf_util/eval_data/instances/')
+        runtime.copy_to(temp_file_path, '/gso_util/eval_data/instances/')
 
-    # inject the instance pyperf entry
+    # inject the instance gso entry
     runtime.copy_to(
-        str(os.path.join(script_dir, 'scripts/setup/instance_pyperf_entry.sh')),
-        '/pyperf_util/',
+        str(os.path.join(script_dir, 'scripts/setup/instance_gso_entry.sh')),
+        '/gso_util/',
     )
 
     # HACK: comment out the source .venv/bin/activate in .bashrc
@@ -191,14 +191,14 @@ def initialize_runtime(runtime: Runtime, instance: pd.Series):
         f'Failed to comment out source .venv/bin/activate: {str(obs)}',
     )
 
-    action = CmdRunAction(command='source /pyperf_util/instance_pyperf_entry.sh')
+    action = CmdRunAction(command='source /gso_util/instance_gso_entry.sh')
     action.set_hard_timeout(600)
     logger.info(action, extra={'msg_type': 'ACTION'})
     obs = runtime.run_action(action)
     logger.info(obs, extra={'msg_type': 'OBSERVATION'})
     assert_and_raise(
         obs.exit_code == 0,
-        f'Failed to source /pyperf_util/instance_pyperf_entry.sh: {str(obs)}',
+        f'Failed to source /gso_util/instance_gso_entry.sh: {str(obs)}',
     )
 
     action = CmdRunAction(command=f'cd /workspace/{workspace_dir_name}')
@@ -247,7 +247,7 @@ def complete_runtime(runtime: Runtime, instance: pd.Series) -> dict[str, Any]:
     logger.info('BEGIN Runtime Completion Fn')
     logger.info('-' * 30)
     obs: CmdOutputObservation
-    workspace_dir_name = _get_pyperf_workspace_dir_name(instance)
+    workspace_dir_name = _get_gso_workspace_dir_name(instance)
 
     action = CmdRunAction(command=f'cd /workspace/{workspace_dir_name}')
     action.set_hard_timeout(600)
@@ -386,9 +386,9 @@ def process_instance(
     config = get_config(instance, metadata)
 
     # format install commands
-    instance['install_commands'] = _get_pyperf_repo_install_script(instance)
+    instance['install_commands'] = _get_gso_repo_install_script(instance)
     if USE_PLANS:
-        instance['plan'] = _get_pyperf_plan(instance)
+        instance['plan'] = _get_gso_plan(instance)
     instance = instance.apply(
         lambda x: ('\n'.join(x) if isinstance(x, (np.ndarray, list)) else x)
     )
@@ -423,7 +423,7 @@ def process_instance(
         if is_fatal_evaluation_error(state.last_error):
             raise EvalException('Fatal error detected: ' + state.last_error)
 
-        # ======= THIS IS PYPERF specific =======
+        # ======= THIS IS GSO specific =======
         # Get git patch
         return_val = complete_runtime(runtime, instance)
         git_patch = return_val['git_patch']
@@ -446,7 +446,7 @@ def process_instance(
     output = EvalOutput(
         instance_id=instance.instance_id,
         instruction=instruction,
-        instance=instance.to_dict(),  # PYPERF Bench specific
+        instance=instance.to_dict(),  # GSO Bench specific
         test_result=test_result,
         metadata=metadata,
         history=histories,
@@ -481,7 +481,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--dataset',
         type=str,
-        default='manishs/pyperf',
+        default='manishs/gso',
         help='data set to evaluate on',
     )
     parser.add_argument(
@@ -493,9 +493,9 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
 
     dataset = load_dataset(args.dataset, split=args.split)
-    pyperf_tests = filter_dataset(dataset.to_pandas(), 'instance_id')
+    gso_tests = filter_dataset(dataset.to_pandas(), 'instance_id')
     logger.info(
-        f'Loaded dataset {args.dataset} with split {args.split}: {len(pyperf_tests)} tasks'
+        f'Loaded dataset {args.dataset} with split {args.split}: {len(gso_tests)} tasks'
     )
 
     llm_config = None
@@ -526,7 +526,7 @@ if __name__ == '__main__':
 
     output_file = os.path.join(metadata.eval_output_dir, 'output.jsonl')
     print(f'### OUTPUT FILE: {output_file} ###')
-    instances = prepare_dataset(pyperf_tests, output_file, args.eval_n_limit)
+    instances = prepare_dataset(gso_tests, output_file, args.eval_n_limit)
 
     run_evaluation(
         instances,

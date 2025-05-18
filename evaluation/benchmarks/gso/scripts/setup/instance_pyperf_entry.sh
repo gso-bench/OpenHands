@@ -1,15 +1,15 @@
 #!/bin/bash
 
 source ~/.bashrc
-UTIL_DIR=/pyperf_util
+UTIL_DIR=/gso_util
 
-if [ -z "$PYPERF_INSTANCE_ID" ]; then
-    echo "Error: PYPERF_INSTANCE_ID is not set." >&2
+if [ -z "$GSO_INSTANCE_ID" ]; then
+    echo "Error: GSO_INSTANCE_ID is not set." >&2
     exit 1
 fi
 
 # Read the swe-bench-test-lite.json file and extract the required item based on instance_id
-item=$(jq --arg INSTANCE_ID "$PYPERF_INSTANCE_ID" '.[] | select(.instance_id == $INSTANCE_ID)' $UTIL_DIR/eval_data/instances/pyperf-instance.json)
+item=$(jq --arg INSTANCE_ID "$GSO_INSTANCE_ID" '.[] | select(.instance_id == $INSTANCE_ID)' $UTIL_DIR/eval_data/instances/gso-instance.json)
 
 if [[ -z "$item" ]]; then
   echo "No item found for the provided instance ID."

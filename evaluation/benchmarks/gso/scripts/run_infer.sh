@@ -8,7 +8,7 @@ COMMIT_HASH="HEAD"
 AGENT="CodeActAgent"
 MAX_ITER=50
 NUM_WORKERS=1
-DATASET="manishs/pyperf"
+DATASET="gso-bench/gso"
 SPLIT="test"
 USE_INSTANCE_IMAGE=true
 RUN_WITH_BROWSING=false
@@ -144,7 +144,7 @@ fi
 
 function run_eval() {
   local eval_note=$1
-  COMMAND="poetry run python evaluation/benchmarks/pyperf/run_infer.py \
+  COMMAND="poetry run python evaluation/benchmarks/gso/run_infer.py \
     --agent-cls $AGENT \
     --llm-config $MODEL_CONFIG \
     --max-iterations $MAX_ITER \

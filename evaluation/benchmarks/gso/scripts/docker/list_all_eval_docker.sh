@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAMESPACE="slimshetty"
-REPO="pyperf"
+REPO="gso"
 URL="https://hub.docker.com/v2/repositories/${NAMESPACE}/${REPO}/tags?page_size=100"
 
 # Use a temp file to collect all tags

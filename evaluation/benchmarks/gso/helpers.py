@@ -15,16 +15,16 @@ DOCKER_IMAGE_PREFIX = os.environ.get(
 )
 
 
-def _get_pyperf_instance_docker_image(instance_id: str) -> str:
-    image_name = 'pyperf:pyperf.eval.x86_64.' + instance_id
+def _get_gso_instance_docker_image(instance_id: str) -> str:
+    image_name = 'gso:gso.eval.x86_64.' + instance_id
     return (DOCKER_IMAGE_PREFIX.rstrip('/') + '/' + image_name).lower()
 
 
-def _get_pyperf_workspace_dir_name(instance: pd.Series) -> str:
+def _get_gso_workspace_dir_name(instance: pd.Series) -> str:
     return f'{instance.repo}'.replace('/', '__')
 
 
-def _get_pyperf_repo_install_script(instance: pd.Series) -> list[str]:
+def _get_gso_repo_install_script(instance: pd.Series) -> list[str]:
     filter_set = ['git clean -xfd', 'which python', 'python --version', 'uv venv']
     install_cmds = instance.install_commands
     filtered_cmds = [
@@ -38,12 +38,12 @@ def _get_pyperf_repo_install_script(instance: pd.Series) -> list[str]:
     return filtered_cmds
 
 
-def _get_pyperf_plan(instance: pd.Series) -> str:
+def _get_gso_plan(instance: pd.Series) -> str:
     return instance[PLAN_TYPE][PLAN_ID].strip()
 
 
 def get_instruction(instance: pd.Series, metadata: EvalMetadata):
-    workspace_dir_name = _get_pyperf_workspace_dir_name(instance)
+    workspace_dir_name = _get_gso_workspace_dir_name(instance)
     # Prepare instruction
     instruction = (
         '<uploaded_files>\n'
