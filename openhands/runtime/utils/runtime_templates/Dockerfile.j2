@@ -74,33 +74,41 @@ RUN mkdir -p /openhands && \
 # https://docs.docker.com/engine/install/ubuntu/
 # https://docs.docker.com/engine/install/debian/
 RUN \
-    # Determine OS type and install accordingly
-    if [[ "{{ base_image }}" == *"ubuntu"* ]]; then \
-        # Handle Ubuntu (following https://docs.docker.com/engine/install/ubuntu/)
-        # Add Docker's official GPG key
+    # Determine OS type by checking /etc/os-release instead of image name
+    if [ -f /etc/os-release ]; then \
+        . /etc/os-release; \
+        if [ "$ID" = "ubuntu" ]; then \
+            # Handle Ubuntu (following https://docs.docker.com/engine/install/ubuntu/)
+            apt-get update && \
+            apt-get install -y ca-certificates curl && \
+            install -m 0755 -d /etc/apt/keyrings && \
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
+            chmod a+r /etc/apt/keyrings/docker.asc && \
+            # Add the repository to Apt sources
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
+        else \
+            # Handle Debian (following https://docs.docker.com/engine/install/debian/)
+            apt-get update && \
+            apt-get install -y ca-certificates curl && \
+            install -m 0755 -d /etc/apt/keyrings && \
+            curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
+            chmod a+r /etc/apt/keyrings/docker.asc && \
+            # Add the repository to Apt sources
+            # For newer releases that might not be supported yet, fall back to stable
+            CODENAME=$(lsb_release -cs); \
+            if [ "$CODENAME" = "noble" ] || [ "$CODENAME" = "oracular" ]; then \
+                CODENAME="jammy"; \
+            fi; \
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $CODENAME stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
+        fi; \
+    else \
+        # Fallback: assume Ubuntu if we can't detect
         apt-get update && \
         apt-get install -y ca-certificates curl && \
         install -m 0755 -d /etc/apt/keyrings && \
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
         chmod a+r /etc/apt/keyrings/docker.asc && \
-        # Add the repository to Apt sources
-        # For Ubuntu 24.04 (noble), use jammy repository as noble isn't supported yet
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
-    else \
-        # Handle Debian (following https://docs.docker.com/engine/install/debian/)
-        # Add Docker's official GPG key
-        apt-get update && \
-        apt-get install -y ca-certificates curl && \
-        install -m 0755 -d /etc/apt/keyrings && \
-        curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
-        chmod a+r /etc/apt/keyrings/docker.asc && \
-        # Add the repository to Apt sources
-        # For Debian, if it's noble (testing/unstable), use bookworm (stable) repository
-        if [ "$(lsb_release -cs)" = "noble" ]; then \
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
-        else \
-            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
-        fi; \
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu jammy stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null; \
     fi && \
     # Install Docker Engine, containerd, and Docker Compose
     apt-get update && \
