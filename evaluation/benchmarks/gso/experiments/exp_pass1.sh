@@ -9,7 +9,7 @@ set -eo pipefail
 # temp=0.1
 
 # gpt-5
-DEBUG=1 ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_gpt-5 --commit-hash HEAD --agent CodeActAgent --num-workers 30 --n-runs 1 --max-iter 100
+./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_gpt-5 --commit-hash HEAD --agent CodeActAgent --num-workers 20 --n-runs 1 --max-iter 100
 docker container prune -f
 
 # o4-mini
