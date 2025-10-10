@@ -8,7 +8,7 @@ from evaluation.benchmarks.swe_bench.eval_infer import process_git_patch
 
 parser = argparse.ArgumentParser()
 parser.add_argument('oh_output_files', type=str, nargs='+')
-parser.add_argument('--dataset', type=str, default='manishs/gso')
+parser.add_argument('--dataset', type=str, default='gso-bench/gso')
 parser.add_argument('--split', type=str, default='test')
 args = parser.parse_args()
 

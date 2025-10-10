@@ -33,18 +33,31 @@ set -eo pipefail
 # done
 # docker container prune -f
 
+# claude-4.5-sonnet
+# until ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_sonnet_4_5_vertex_0-1 --commit-hash HEAD --agent CodeActAgent --num-workers 5 --n-runs 1 --max-iter 100; do
+#     echo "Error occurred. Retrying in 20 seconds..."
+#     sleep 20
+# done
+# docker container prune -f
+
+# gemini-2.5-pro
+# until ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_gemini-2_5-pro_vertex_0-1 --commit-hash HEAD --agent CodeActAgent --num-workers 5 --n-runs 1 --max-iter 100; do
+#     echo "Error occurred. Retrying in 20 seconds..."
+#     sleep 20
+# done
+# docker container prune -f
+
 
 ########### Open Models ###########
 
 # qwen3-coder
-./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_qwen3_coder --commit-hash HEAD --agent CodeActAgent --num-workers 30 --n-runs 1 --max-iter 100
-docker container prune -f
-
-
-# # kimi_k2_instruct
-# ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_kimi_k2_instruct --commit-hash HEAD --agent CodeActAgent --num-workers 1 --n-runs 1 --max-iter 100
+# ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_qwen3_coder --commit-hash HEAD --agent CodeActAgent --num-workers 10 --n-runs 1 --max-iter 100
 # docker container prune -f
 
-# # glm4.5
-# ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_glm4_5 --commit-hash HEAD --agent CodeActAgent --num-workers 1 --n-runs 1 --max-iter 100
+# kimi_k2_instruct
+# ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_kimi_k2_instruct --commit-hash HEAD --agent CodeActAgent --num-workers 30 --n-runs 1 --max-iter 100
+# docker container prune -f
+
+# glm-4.5-air
+# ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_glm4_5 --commit-hash HEAD --agent CodeActAgent --num-workers 30 --n-runs 1 --max-iter 100
 # docker container prune -f

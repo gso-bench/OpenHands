@@ -498,6 +498,10 @@ if __name__ == '__main__':
         # modify_params must be False for evaluation purpose, for reproducibility and accurancy of results
         llm_config.modify_params = False
 
+        # NOTE: for some Vertex AI models,set top_p to None to avoid conflict with temperature
+        if llm_config.model.startswith('vertex_ai/claude'):
+            llm_config.top_p = None
+
     if llm_config is None:
         raise ValueError(f'Could not find LLM config: --llm_config {args.llm_config}')
 

@@ -62,7 +62,6 @@ gso:gso.eval.x86_64.pandas-dev__pandas-438b957
 gso:gso.eval.x86_64.pandas-dev__pandas-45f0705
 gso:gso.eval.x86_64.pandas-dev__pandas-5d82d8b
 gso:gso.eval.x86_64.pandas-dev__pandas-609c3b7
-gso:gso.eval.x86_64.pandas-dev__pandas-6466fc6
 gso:gso.eval.x86_64.pandas-dev__pandas-65bca65
 gso:gso.eval.x86_64.pandas-dev__pandas-71c94af
 gso:gso.eval.x86_64.pandas-dev__pandas-81b5f1d
@@ -86,8 +85,6 @@ gso:gso.eval.x86_64.pydantic__pydantic-4a09447
 gso:gso.eval.x86_64.pydantic__pydantic-ac9e6ee
 gso:gso.eval.x86_64.pydantic__pydantic-addf1f9
 gso:gso.eval.x86_64.pydantic__pydantic-c2647ab
-gso:gso.eval.x86_64.pydantic__pydantic-c5dce37
-gso:gso.eval.x86_64.python-pillow__pillow-4bc33d3
 gso:gso.eval.x86_64.python-pillow__pillow-63f398b
 gso:gso.eval.x86_64.python-pillow__pillow-d8af3fc
 gso:gso.eval.x86_64.python-pillow__pillow-f854676
