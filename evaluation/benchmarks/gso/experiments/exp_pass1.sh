@@ -47,6 +47,20 @@ set -eo pipefail
 # done
 # docker container prune -f
 
+# # gemini-3-pro
+# until ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_gemini-3-pro_vertex_0-1 --commit-hash HEAD --agent CodeActAgent --num-workers 5 --n-runs 1 --max-iter 100; do
+#     echo "Error occurred. Retrying in 20 seconds..."
+#     sleep 20
+# done
+# docker container prune -f
+
+# claude-4.5-opus
+# until ./evaluation/benchmarks/gso/scripts/run_infer.sh --model-config llm.eval_opus_4_5_vertex_0-1 --commit-hash HEAD --agent CodeActAgent --num-workers 5 --n-runs 1 --max-iter 100; do
+#     echo "Error occurred. Retrying in 20 seconds..."
+#     sleep 20
+# done
+# docker container prune -f
+
 
 ########### Open Models ###########
 
